@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from 'next'
 import { Noto_Sans_SC, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const _notoSansSC = Noto_Sans_SC({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'LiveStage | 歌单',
-  description: '现场演出歌单 - 扫码点歌，尽享音乐',
+  title: '王咚咚 | 歌单',
+  description: '独立原创音乐人王咚咚 - 现场演出歌单',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -33,8 +35,6 @@ export const viewport: Viewport = {
   themeColor: '#1a1625',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 }
 
 export default function RootLayout({
@@ -43,9 +43,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster position="top-center" richColors />
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

@@ -22,19 +22,27 @@ export function ArtistFilter({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="border-b border-border bg-background/60">
+    <div className="border-b border-border/80 bg-background/45 px-4 pb-3 pt-2">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+          歌手筛选
+        </p>
+        <span className="text-[11px] text-muted-foreground">
+          {selectedArtist ? `已选：${selectedArtist}` : `${artists.length} 位歌手`}
+        </span>
+      </div>
       <div
         ref={scrollRef}
-        className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide"
+        className="flex gap-2 overflow-x-auto scrollbar-hide"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <button
           onClick={() => onSelect(null)}
           className={cn(
-            "shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-colors",
+            "shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium transition-all",
             selectedArtist === null
-              ? "bg-primary text-primary-foreground"
-              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              ? "border-primary/80 bg-primary text-primary-foreground shadow-md shadow-primary/20"
+              : "border-border/70 bg-card/70 text-secondary-foreground hover:border-primary/50 hover:text-foreground"
           )}
         >
           全部
@@ -46,14 +54,16 @@ export function ArtistFilter({
               onSelect(selectedArtist === a.artist ? null : a.artist)
             }
             className={cn(
-              "shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-colors",
+              "shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium transition-all",
               selectedArtist === a.artist
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                ? "border-primary/80 bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                : "border-border/70 bg-card/70 text-secondary-foreground hover:border-primary/50 hover:text-foreground"
             )}
           >
             {a.artist}
-            <span className="ml-1 opacity-60">{a.song_count}</span>
+            <span className="ml-1.5 rounded-full bg-background/35 px-1.5 py-0.5 text-[10px] opacity-80">
+              {a.song_count}
+            </span>
           </button>
         ))}
       </div>
