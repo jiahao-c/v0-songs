@@ -7,8 +7,8 @@ const _notoSansSC = Noto_Sans_SC({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'LiveStage | 歌单',
-  description: '现场演出歌单 - 扫码点歌，尽享音乐',
+  title: '王咚咚 | 歌单',
+  description: '独立原创音乐人王咚咚 - 现场演出歌单',
   generator: 'v0.app',
   icons: {
     icon: [
