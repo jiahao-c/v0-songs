@@ -1,14 +1,14 @@
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import type { Metadata, Viewport } from 'next'
+import { Noto_Sans_SC, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
+const _notoSansSC = Noto_Sans_SC({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'LiveStage | 歌单',
+  description: '现场演出歌单 - 扫码点歌，尽享音乐',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -29,13 +29,21 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: '#1a1625',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body className="font-sans antialiased">
         {children}
         <Analytics />
