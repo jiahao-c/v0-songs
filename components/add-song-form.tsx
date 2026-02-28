@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface AddSongFormProps {
   onAdded: () => void;
@@ -25,21 +26,31 @@ export function AddSongForm({ onAdded, existingArtists }: AddSongFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!artist.trim() || !title.trim()) return;
+    const trimmedArtist = artist.trim();
+    const trimmedTitle = title.trim();
+    if (!trimmedArtist || !trimmedTitle) return;
 
     setLoading(true);
     try {
       const res = await fetch("/api/songs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ artist: artist.trim(), title: title.trim() }),
+        body: JSON.stringify({ artist: trimmedArtist, title: trimmedTitle }),
       });
 
-      if (res.ok) {
-        setTitle("");
-        titleRef.current?.focus();
-        onAdded();
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        toast.error(payload?.error || "添加失败，请稍后重试");
+        return;
       }
+
+      setTitle("");
+      titleRef.current?.focus();
+      onAdded();
+      toast.success(`已添加《${trimmedTitle}》`);
+    } catch {
+      toast.error("网络异常，请稍后重试");
     } finally {
       setLoading(false);
     }
