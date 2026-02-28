@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS songs (
+  id SERIAL PRIMARY KEY,
+  artist VARCHAR(100) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_songs_artist ON songs(artist);
