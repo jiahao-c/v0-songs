@@ -3,6 +3,7 @@ import { Noto_Sans_SC, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
+import '@mdxeditor/editor/style.css'
 import './globals.css'
 
 const _notoSansSC = Noto_Sans_SC({ subsets: ["latin"] });
@@ -32,7 +33,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1a1625',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fbf8f0' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1625' },
+  ],
   width: 'device-width',
   initialScale: 1,
 }
@@ -47,7 +51,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

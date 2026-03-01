@@ -4,6 +4,7 @@ import { ArrowLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ManagePageContent } from "@/components/manage-page-content";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { loginToManage } from "./actions";
 import {
   MANAGE_AUTH_COOKIE,
@@ -47,7 +48,8 @@ export default async function ManagePage({ searchParams }: ManagePageProps) {
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
-          <h1 className="text-lg font-bold text-foreground">歌单管理</h1>
+          <h1 className="text-lg font-bold text-foreground">内容管理</h1>
+          <ThemeToggle className="ml-auto" />
         </div>
       </header>
 

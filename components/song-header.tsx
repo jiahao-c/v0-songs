@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Settings2 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SongHeader({ totalSongs }: { totalSongs: number }) {
   return (
@@ -17,7 +18,7 @@ export function SongHeader({ totalSongs }: { totalSongs: number }) {
       <div className="relative flex items-center gap-3 px-4 py-3">
         <Link
           href="/about"
-          className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-0.5 transition-colors hover:bg-secondary/45"
+          className="group flex flex-1 shrink-0 items-center gap-3 rounded-xl px-1 py-0.5 transition-colors hover:bg-secondary/45"
         >
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-primary/40 transition-transform duration-300 group-hover:scale-105">
             <Image
@@ -39,10 +40,11 @@ export function SongHeader({ totalSongs }: { totalSongs: number }) {
           </div>
         </Link>
 
+        <ThemeToggle />
         <Link
           href="/manage"
           className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card/75 px-3 text-xs font-medium text-foreground transition-all hover:-translate-y-0.5 hover:border-primary/70 hover:text-primary"
-          aria-label="歌单管理"
+          aria-label="内容管理"
         >
           <Settings2 className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">管理</span>

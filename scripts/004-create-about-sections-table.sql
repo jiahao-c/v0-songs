@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS about_sections (
+  section_key VARCHAR(50) PRIMARY KEY,
+  content_markdown TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

@@ -4,7 +4,9 @@ import useSWR from "swr";
 import Link from "next/link";
 import { ArrowLeft, Music, Loader2 } from "lucide-react";
 import { AddSongForm } from "@/components/add-song-form";
+import { ManageAboutSectionsEditor } from "@/components/manage-about-sections-editor";
 import { ManageSongList } from "@/components/manage-song-list";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Song {
   id: number;
@@ -51,17 +53,27 @@ export function ManagePageContent() {
           </Link>
           <div className="flex items-center gap-2">
             <Music className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-bold text-foreground">歌单管理</h1>
+            <h1 className="text-lg font-bold text-foreground">内容管理</h1>
           </div>
-          {songs && (
-            <span className="ml-auto text-xs text-muted-foreground">
-              共 {songs.length} 首
-            </span>
-          )}
+          <div className="ml-auto flex items-center gap-2">
+            {songs && (
+              <span className="text-xs text-muted-foreground">
+                共 {songs.length} 首
+              </span>
+            )}
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-4 py-5">
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">
+            介绍编辑
+          </h2>
+          <ManageAboutSectionsEditor />
+        </section>
+
         <section>
           <h2 className="mb-3 text-sm font-semibold text-foreground">
             添加歌曲
