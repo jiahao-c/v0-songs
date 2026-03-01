@@ -26,12 +26,12 @@ export function MdxMarkdownEditor({
   placeholder,
 }: MdxMarkdownEditorProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-secondary/30">
+    <div className="overflow-hidden rounded-lg border border-border bg-white text-slate-900">
       <MDXEditor
         markdown={markdown}
         onChange={onChange}
         placeholder={placeholder}
-        contentEditableClassName="min-h-[180px] px-4 py-3 text-sm leading-relaxed text-foreground"
+        contentEditableClassName="min-h-[180px] bg-white px-4 py-3 text-sm leading-relaxed text-slate-900"
         plugins={[
           headingsPlugin(),
           listsPlugin(),
