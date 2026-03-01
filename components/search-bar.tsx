@@ -20,7 +20,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="搜索歌曲或歌手..."
+          placeholder="搜索歌曲或歌手（支持拼音）..."
           className="h-11 w-full rounded-xl border border-border/80 bg-card/70 pl-11 pr-10 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus:border-primary/80 focus:outline-none focus:ring-1 focus:ring-primary/50"
         />
         {value && (

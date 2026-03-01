@@ -42,7 +42,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       size="sm"
       onClick={() => setTheme(nextTheme)}
       className={cn(
-        "h-9 w-9 shrink-0 justify-center gap-0 rounded-full border border-border/70 bg-card/75 px-0 text-xs font-medium text-muted-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-primary/70 hover:text-primary sm:w-auto sm:gap-1.5 sm:px-3",
+        "h-9 w-9 shrink-0 justify-center gap-0 rounded-full border border-border/70 bg-card/75 px-0 text-xs font-medium text-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-primary/70 hover:bg-card/75 hover:text-primary sm:w-auto sm:gap-1.5 sm:px-3",
         className
       )}
       aria-label={ariaLabel}
