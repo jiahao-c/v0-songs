@@ -226,7 +226,7 @@ export function SongCatalog() {
           )}
 
           <DialogHeader>
-            <DialogTitle className="text-base">点歌说明</DialogTitle>
+            <DialogTitle className="text-base">如何点歌</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
