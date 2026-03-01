@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { sql } from "@/lib/db";
-import { pinyin } from "pinyin";
+import { pinyin } from "pinyin-pro";
 
 export interface Song {
   id: number;
@@ -26,15 +26,6 @@ interface SongQueryOptions {
   searchTerm: string | null;
 }
 
-type PinyinOptions = Parameters<typeof pinyin>[1];
-type PinyinMatrix = string[][];
-
-const PINYIN_OPTIONS: PinyinOptions = {
-  style: "normal",
-  heteronym: false,
-  segment: true,
-};
-
 export function normalizeSongSort(value: string | null): SongSort {
   if (value === "title" || value === "newest") {
     return value;
@@ -51,34 +42,21 @@ function textContainsSearch(text: string, searchTerm: string): boolean {
   return text.toLowerCase().includes(searchTerm.toLowerCase());
 }
 
-function buildPinyinForms(
-  text: string,
-  cache: Map<string, { joined: string; initials: string }>
-) {
-  if (cache.has(text)) {
-    return cache.get(text)!;
-  }
-
-  const converted = pinyin(text, PINYIN_OPTIONS) as PinyinMatrix;
-  const syllables = converted
-    .map((entry) => entry[0]?.toLowerCase() ?? "")
-    .filter(Boolean);
-  const joined = syllables.join("");
-  const initials = syllables.map((syllable) => syllable[0] ?? "").join("");
-
-  const result = { joined, initials };
-  cache.set(text, result);
-  return result;
+function getPinyinInitials(text: string): string {
+  return toNormalizedAlphaNumeric(
+    pinyin(text, {
+      pattern: "first",
+      toneType: "none",
+      nonZh: "removed",
+    })
+  );
 }
 
-function matchesSongBySearchTerm(
-  song: Song,
-  searchTerm: string,
-  pinyinCache: Map<string, { joined: string; initials: string }>
-): boolean {
+function matchesSongBySearchTerm(song: Song, searchTerm: string): boolean {
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-  const normalizedAlphaNumericSearch = toNormalizedAlphaNumeric(searchTerm);
+  const normalizedAlphaNumericSearch = toNormalizedAlphaNumeric(normalizedSearchTerm);
   const artistAndTitle = `${song.artist} ${song.title}`;
+  const normalizedArtistAndTitle = toNormalizedAlphaNumeric(artistAndTitle);
 
   if (textContainsSearch(artistAndTitle, normalizedSearchTerm)) {
     return true;
@@ -88,14 +66,15 @@ function matchesSongBySearchTerm(
     return false;
   }
 
-  const artistPinyin = buildPinyinForms(song.artist, pinyinCache);
-  const titlePinyin = buildPinyinForms(song.title, pinyinCache);
-  const combinedJoined = `${artistPinyin.joined}${titlePinyin.joined}`;
-  const combinedInitials = `${artistPinyin.initials}${titlePinyin.initials}`;
+  const artistInitials = getPinyinInitials(song.artist);
+  const titleInitials = getPinyinInitials(song.title);
+  const artistAndTitleInitials = `${artistInitials}${titleInitials}`;
 
   return (
-    combinedJoined.includes(normalizedAlphaNumericSearch) ||
-    combinedInitials.includes(normalizedAlphaNumericSearch)
+    normalizedArtistAndTitle.includes(normalizedAlphaNumericSearch) ||
+    artistInitials.startsWith(normalizedAlphaNumericSearch) ||
+    titleInitials.startsWith(normalizedAlphaNumericSearch) ||
+    artistAndTitleInitials.startsWith(normalizedAlphaNumericSearch)
   );
 }
 
@@ -149,10 +128,7 @@ async function querySongs({ sort, artist, searchTerm }: SongQueryOptions) {
     return songs;
   }
 
-  const pinyinCache = new Map<string, { joined: string; initials: string }>();
-  return songs.filter((song) =>
-    matchesSongBySearchTerm(song, normalizedSearchTerm, pinyinCache)
-  );
+  return songs.filter((song) => matchesSongBySearchTerm(song, normalizedSearchTerm));
 }
 
 const getSongsCached = unstable_cache(
