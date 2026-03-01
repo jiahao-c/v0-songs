@@ -24,8 +24,12 @@ const MdxMarkdownEditor = dynamic(
 type SectionKey = "about_intro" | "about_songlist";
 
 interface AboutSection {
-  section_key: SectionKey;
+  section_key: string;
   content_markdown: string;
+}
+
+interface ManageAboutSectionsEditorProps {
+  initialSections?: AboutSection[];
 }
 
 const DEFAULT_INTRO_MARKDOWN = `大家好，我是王咚咚，一名来自多伦多的独立原创音乐人。
@@ -38,15 +42,31 @@ const DEFAULT_SONGLIST_MARKDOWN = `欢迎大家点歌！点歌是免费的！
 
 但如果你喜欢我的演唱，我会很感谢您的小费支持！希望我的歌声带给你美好的音乐体验！`;
 
-export function ManageAboutSectionsEditor() {
-  const [introMarkdown, setIntroMarkdown] = useState(DEFAULT_INTRO_MARKDOWN);
-  const [songlistMarkdown, setSonglistMarkdown] = useState(
-    DEFAULT_SONGLIST_MARKDOWN
+export function ManageAboutSectionsEditor({
+  initialSections,
+}: ManageAboutSectionsEditorProps) {
+  const initialIntro = initialSections?.find(
+    (item) => item.section_key === "about_intro"
   );
-  const [loading, setLoading] = useState(true);
+  const initialSonglist = initialSections?.find(
+    (item) => item.section_key === "about_songlist"
+  );
+
+  const [introMarkdown, setIntroMarkdown] = useState(
+    initialIntro?.content_markdown ?? DEFAULT_INTRO_MARKDOWN
+  );
+  const [songlistMarkdown, setSonglistMarkdown] = useState(
+    initialSonglist?.content_markdown ?? DEFAULT_SONGLIST_MARKDOWN
+  );
+  const [loading, setLoading] = useState(!initialSections);
   const [savingSection, setSavingSection] = useState<SectionKey | null>(null);
 
   useEffect(() => {
+    if (initialSections) {
+      setLoading(false);
+      return;
+    }
+
     async function loadSections() {
       try {
         const response = await fetch("/api/about-sections");
@@ -83,7 +103,7 @@ export function ManageAboutSectionsEditor() {
     }
 
     loadSections();
-  }, []);
+  }, [initialSections]);
 
   async function saveSection(sectionKey: SectionKey, contentMarkdown: string) {
     setSavingSection(sectionKey);

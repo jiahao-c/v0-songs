@@ -7,30 +7,35 @@ import { AddSongForm } from "@/components/add-song-form";
 import { ManageAboutSectionsEditor } from "@/components/manage-about-sections-editor";
 import { ManageSongList } from "@/components/manage-song-list";
 import { ThemeToggle } from "@/components/theme-toggle";
+import type { AboutSection, Artist, Song } from "@/lib/content-data";
 
-interface Song {
-  id: number;
-  artist: string;
-  title: string;
-}
-
-interface Artist {
-  artist: string;
-  song_count: string;
+interface ManagePageContentProps {
+  initialSongs?: Song[];
+  initialArtists?: Artist[];
+  initialAboutSections?: AboutSection[];
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function ManagePageContent() {
+export function ManagePageContent({
+  initialSongs,
+  initialArtists,
+  initialAboutSections,
+}: ManagePageContentProps) {
   const {
     data: songs,
     isLoading,
     mutate: mutateSongs,
-  } = useSWR<Song[]>("/api/songs", fetcher);
+  } = useSWR<Song[]>("/api/songs", fetcher, {
+    fallbackData: initialSongs,
+  });
 
   const { data: artists, mutate: mutateArtists } = useSWR<Artist[]>(
     "/api/artists",
-    fetcher
+    fetcher,
+    {
+      fallbackData: initialArtists,
+    }
   );
 
   const existingArtists = artists?.map((a) => a.artist) ?? [];
@@ -71,7 +76,7 @@ export function ManagePageContent() {
           <h2 className="mb-3 text-sm font-semibold text-foreground">
             介绍编辑
           </h2>
-          <ManageAboutSectionsEditor />
+          <ManageAboutSectionsEditor initialSections={initialAboutSections} />
         </section>
 
         <section>

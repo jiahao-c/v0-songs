@@ -11,6 +11,11 @@ import {
   isAdminPasswordConfigured,
   isValidManageAuthCookie,
 } from "@/lib/manage-auth";
+import {
+  getAboutSectionsData,
+  getArtistsData,
+  getSongsData,
+} from "@/lib/content-data";
 
 const ERROR_MESSAGES: Record<string, string> = {
   "invalid-password": "密码错误，请重试。",
@@ -28,7 +33,19 @@ export default async function ManagePage({ searchParams }: ManagePageProps) {
   const authCookie = cookieStore.get(MANAGE_AUTH_COOKIE)?.value;
 
   if (isValidManageAuthCookie(authCookie)) {
-    return <ManagePageContent />;
+    const [songs, artists, aboutSections] = await Promise.all([
+      getSongsData({ sort: "artist" }),
+      getArtistsData(),
+      getAboutSectionsData(),
+    ]);
+
+    return (
+      <ManagePageContent
+        initialSongs={songs}
+        initialArtists={artists}
+        initialAboutSections={aboutSections}
+      />
+    );
   }
 
   const isConfigured = isAdminPasswordConfigured();

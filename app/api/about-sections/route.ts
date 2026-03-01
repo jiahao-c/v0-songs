@@ -1,11 +1,13 @@
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
 import {
   MANAGE_AUTH_COOKIE,
   isAdminPasswordConfigured,
   isValidManageAuthCookie,
 } from "@/lib/manage-auth";
+import { getAboutSectionsData } from "@/lib/content-data";
 
 const EDITABLE_SECTION_KEYS = ["about_intro", "about_songlist"] as const;
 type EditableSectionKey = (typeof EDITABLE_SECTION_KEYS)[number];
@@ -29,13 +31,7 @@ async function requireManageAccess() {
 
 export async function GET() {
   try {
-    const rows = await sql`
-      SELECT section_key, content_markdown
-      FROM about_sections
-      WHERE section_key IN ('about_intro', 'about_songlist')
-      ORDER BY section_key
-    `;
-
+    const rows = await getAboutSectionsData();
     return NextResponse.json(rows);
   } catch (error) {
     console.error("Failed to fetch about sections:", error);
@@ -93,6 +89,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    revalidateTag("about-sections", "max");
     return NextResponse.json(result[0]);
   } catch (error) {
     console.error("Failed to update about section:", error);

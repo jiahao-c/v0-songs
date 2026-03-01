@@ -1,15 +1,9 @@
-import { sql } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { getArtistsData } from "@/lib/content-data";
 
 export async function GET() {
   try {
-    const artists = await sql`
-      SELECT artist, COUNT(*) as song_count 
-      FROM songs 
-      GROUP BY artist 
-      ORDER BY COUNT(*) DESC, artist
-    `;
-
+    const artists = await getArtistsData();
     return NextResponse.json(artists);
   } catch (error) {
     console.error("Failed to fetch artists:", error);

@@ -1,11 +1,13 @@
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
 import {
   MANAGE_AUTH_COOKIE,
   isAdminPasswordConfigured,
   isValidManageAuthCookie,
 } from "@/lib/manage-auth";
+import { getSongsData, normalizeSongSort } from "@/lib/content-data";
 
 async function requireManageAccess() {
   if (!isAdminPasswordConfigured()) {
@@ -28,109 +30,10 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const artist = searchParams.get("artist")?.trim() || null;
   const searchTerm = searchParams.get("search")?.trim() || null;
-  const searchPattern = searchTerm ? `%${searchTerm}%` : null;
-  const requestedSort = searchParams.get("sort");
-  const sort =
-    requestedSort === "title" ||
-    requestedSort === "newest"
-      ? requestedSort
-      : "artist";
+  const sort = normalizeSongSort(searchParams.get("sort"));
 
   try {
-    let songs;
-
-    if (sort === "title") {
-      if (artist && searchPattern) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist = ${artist}
-            AND (artist ILIKE ${searchPattern} OR title ILIKE ${searchPattern})
-          ORDER BY title, artist
-        `;
-      } else if (artist) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist = ${artist}
-          ORDER BY title, artist
-        `;
-      } else if (searchPattern) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist ILIKE ${searchPattern} OR title ILIKE ${searchPattern}
-          ORDER BY title, artist
-        `;
-      } else {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          ORDER BY title, artist
-        `;
-      }
-    } else if (sort === "newest") {
-      if (artist && searchPattern) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist = ${artist}
-            AND (artist ILIKE ${searchPattern} OR title ILIKE ${searchPattern})
-          ORDER BY created_at DESC, artist, title
-        `;
-      } else if (artist) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist = ${artist}
-          ORDER BY created_at DESC, artist, title
-        `;
-      } else if (searchPattern) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist ILIKE ${searchPattern} OR title ILIKE ${searchPattern}
-          ORDER BY created_at DESC, artist, title
-        `;
-      } else {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          ORDER BY created_at DESC, artist, title
-        `;
-      }
-    } else {
-      if (artist && searchPattern) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist = ${artist}
-            AND (artist ILIKE ${searchPattern} OR title ILIKE ${searchPattern})
-          ORDER BY artist, title
-        `;
-      } else if (artist) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist = ${artist}
-          ORDER BY artist, title
-        `;
-      } else if (searchPattern) {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          WHERE artist ILIKE ${searchPattern} OR title ILIKE ${searchPattern}
-          ORDER BY artist, title
-        `;
-      } else {
-        songs = await sql`
-          SELECT id, artist, title
-          FROM songs
-          ORDER BY artist, title
-        `;
-      }
-    }
-
+    const songs = await getSongsData({ sort, artist, searchTerm });
     return NextResponse.json(songs);
   } catch (error) {
     console.error("Failed to fetch songs:", error);
@@ -174,6 +77,8 @@ export async function POST(request: NextRequest) {
       RETURNING id, artist, title
     `;
 
+    revalidateTag("songs", "max");
+    revalidateTag("artists", "max");
     return NextResponse.json(result[0], { status: 201 });
   } catch (error) {
     console.error("Failed to add song:", error);
@@ -202,6 +107,8 @@ export async function DELETE(request: NextRequest) {
 
     await sql`DELETE FROM songs WHERE id = ${id}`;
 
+    revalidateTag("songs", "max");
+    revalidateTag("artists", "max");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete song:", error);
@@ -247,6 +154,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "song not found" }, { status: 404 });
     }
 
+    revalidateTag("songs", "max");
     return NextResponse.json(result[0]);
   } catch (error) {
     console.error("Failed to update song:", error);

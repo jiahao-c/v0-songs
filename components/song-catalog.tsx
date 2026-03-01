@@ -7,7 +7,6 @@ import { SearchBar } from "./search-bar";
 import { ArtistFilter } from "./artist-filter";
 import { SongList } from "./song-list";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogClose,
@@ -19,24 +18,13 @@ import {
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { AboutSection, Artist, Song } from "@/lib/content-data";
 
-interface Song {
-  id: number;
-  artist: string;
-  title: string;
+interface SongCatalogProps {
+  initialSongs?: Song[];
+  initialArtists?: Artist[];
+  initialAboutSections?: AboutSection[];
 }
-
-interface Artist {
-  artist: string;
-  song_count: string;
-}
-
-interface AboutSection {
-  section_key: string;
-  content_markdown: string;
-}
-
-type SortMode = "artist" | "title" | "newest";
 
 const DEFAULT_SONGLIST_MARKDOWN = `欢迎大家点歌！点歌是免费的！
 
@@ -70,12 +58,6 @@ const markdownComponents = {
   ),
 };
 
-const sortOptions: Array<{ value: SortMode; label: string }> = [
-  { value: "artist", label: "按歌手" },
-  { value: "title", label: "按歌名" },
-  { value: "newest", label: "最新添加" },
-];
-
 const fetcher = async (url: string) => {
   const res = await fetch(url);
   if (!res.ok) {
@@ -84,10 +66,13 @@ const fetcher = async (url: string) => {
   return res.json();
 };
 
-export function SongCatalog() {
+export function SongCatalog({
+  initialSongs,
+  initialArtists,
+  initialAboutSections,
+}: SongCatalogProps) {
   const [search, setSearch] = useState("");
   const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
-  const [sortMode, setSortMode] = useState<SortMode>("artist");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isSonglistModalOpen, setIsSonglistModalOpen] = useState(false);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
@@ -102,7 +87,7 @@ export function SongCatalog() {
 
   const songsQuery = useMemo(() => {
     const params = new URLSearchParams();
-    params.set("sort", sortMode);
+    params.set("sort", "artist");
 
     if (selectedArtist) {
       params.set("artist", selectedArtist);
@@ -113,22 +98,31 @@ export function SongCatalog() {
     }
 
     return `/api/songs?${params.toString()}`;
-  }, [debouncedSearch, selectedArtist, sortMode]);
+  }, [debouncedSearch, selectedArtist]);
+
+  const initialSongsQuery = "sort=artist";
+  const shouldUseInitialSongs =
+    songsQuery === `/api/songs?${initialSongsQuery}` && !!initialSongs;
 
   const { data: songs, isLoading: songsLoading, error: songsError } = useSWR<
     Song[]
   >(songsQuery, fetcher, {
     keepPreviousData: true,
+    fallbackData: shouldUseInitialSongs ? initialSongs : undefined,
   });
 
   const {
     data: artists,
     isLoading: artistsLoading,
     error: artistsError,
-  } = useSWR<Artist[]>("/api/artists", fetcher);
+  } = useSWR<Artist[]>("/api/artists", fetcher, {
+    fallbackData: initialArtists,
+  });
   const { data: aboutSections, isLoading: aboutSectionsLoading } = useSWR<
     AboutSection[]
-  >("/api/about-sections", fetcher);
+  >("/api/about-sections", fetcher, {
+    fallbackData: initialAboutSections,
+  });
 
   const songlistMarkdown = useMemo(() => {
     return (
@@ -147,35 +141,12 @@ export function SongCatalog() {
 
   const isInitialLoading = (songsLoading && !songs) || (artistsLoading && !artists);
   const hasError = songsError || artistsError;
-  const groupedByArtist = sortMode === "artist" && !selectedArtist;
+  const groupedByArtist = !selectedArtist;
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <SongHeader totalSongs={totalSongs} />
       <SearchBar value={search} onChange={setSearch} />
-
-      <div className="border-b border-border/80 bg-background/45 px-4 pb-3">
-        <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-          排序方式
-        </p>
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-          {sortOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setSortMode(option.value)}
-              className={cn(
-                "shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium transition-all",
-                sortMode === option.value
-                  ? "border-primary/80 bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                  : "border-border/70 bg-card/70 text-secondary-foreground hover:border-primary/50 hover:text-foreground"
-              )}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {!artistsLoading && artists && (
         <ArtistFilter

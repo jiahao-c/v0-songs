@@ -4,10 +4,10 @@ import { ArrowLeft, Music, Heart } from "lucide-react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AboutSocialMediaSection } from "../../components/about-social-media";
-import { sql } from "@/lib/db";
 import { ThemeToggle } from "@/components/theme-toggle";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { getAboutSectionsData } from "@/lib/content-data";
 
 export const metadata: Metadata = {
   title: "关于 | 王咚咚",
@@ -54,11 +54,7 @@ const markdownComponents = {
 
 async function getAboutSectionContent() {
   try {
-    const rows = await sql`
-      SELECT section_key, content_markdown
-      FROM about_sections
-      WHERE section_key IN ('about_intro', 'about_songlist')
-    `;
+    const rows = await getAboutSectionsData();
 
     const byKey = new Map<string, string>();
     for (const row of rows) {
@@ -140,7 +136,7 @@ export default async function AboutPage() {
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="mb-3 flex items-center gap-2">
               <Heart className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">歌单</h3>
+              <h3 className="text-sm font-semibold text-foreground">如何点歌</h3>
             </div>
             <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
               <ReactMarkdown
