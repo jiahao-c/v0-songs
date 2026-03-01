@@ -12,19 +12,25 @@ interface SongListProps {
   songs: Song[];
   showArtist: boolean;
   groupedByArtist?: boolean;
+  onSongClick?: (song: Song) => void;
 }
 
 function SongRow({
   song,
   index,
   showArtist,
+  onClick,
 }: {
   song: Song;
   index: number;
   showArtist: boolean;
+  onClick?: () => void;
 }) {
-  return (
-    <div className="group flex items-center gap-4 border-b border-border/50 px-4 py-3 transition-[background-color,transform] duration-200 hover:bg-secondary/35 active:scale-[0.995] active:bg-secondary/60">
+  const baseRowClassName =
+    "group flex items-center gap-4 border-b border-border/50 px-4 py-3 text-left transition-[background-color,transform] duration-200 hover:bg-secondary/35 active:scale-[0.995] active:bg-secondary/60";
+
+  const rowContent = (
+    <>
       <span className="w-6 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
         {index}
       </span>
@@ -36,6 +42,24 @@ function SongRow({
           <span className="truncate text-xs text-muted-foreground">{song.artist}</span>
         )}
       </div>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`${baseRowClassName} w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none`}
+      >
+        {rowContent}
+      </button>
+    );
+  }
+
+  return (
+    <div className={baseRowClassName}>
+      {rowContent}
     </div>
   );
 }
@@ -44,6 +68,7 @@ export function SongList({
   songs,
   showArtist,
   groupedByArtist = true,
+  onSongClick,
 }: SongListProps) {
   if (songs.length === 0) {
     return (
@@ -66,6 +91,7 @@ export function SongList({
             song={song}
             index={idx + 1}
             showArtist={showArtist}
+            onClick={onSongClick ? () => onSongClick(song) : undefined}
           />
         ))}
       </div>
@@ -99,6 +125,7 @@ export function SongList({
               song={song}
               index={idx + 1}
               showArtist={false}
+              onClick={onSongClick ? () => onSongClick(song) : undefined}
             />
           ))}
         </div>
