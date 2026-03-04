@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 import { useRef } from "react";
 
 interface Artist {
@@ -27,9 +28,19 @@ export function ArtistFilter({
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
           歌手筛选
         </p>
-        <span className="text-[11px] text-muted-foreground">
-          {selectedArtist ? `已选：${selectedArtist}` : `${artists.length} 位歌手`}
-        </span>
+        {selectedArtist ? (
+          <button
+            onClick={() => onSelect(null)}
+            className="group flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] text-primary transition-all hover:border-primary/50 hover:bg-primary/20 active:scale-95"
+          >
+            <span>已选：{selectedArtist}</span>
+            <X className="h-3 w-3 opacity-60 transition-opacity group-hover:opacity-100" />
+          </button>
+        ) : (
+          <span className="text-[11px] text-muted-foreground">
+            {artists.length} 位歌手
+          </span>
+        )}
       </div>
       <div
         ref={scrollRef}
