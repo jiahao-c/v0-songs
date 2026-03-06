@@ -29,7 +29,9 @@ function pickRandomSong(songs: Song[], excludedSongIds: number[] = []): Song {
     return songs[0];
   }
 
-  const excludedIds = new Set(excludedSongIds.filter((songId) => songId != null));
+  const excludedIds = new Set(
+    excludedSongIds.filter((songId) => songId != null),
+  );
   let nextSong = songs[Math.floor(Math.random() * songs.length)];
 
   while (excludedIds.has(nextSong.id) && excludedIds.size < songs.length) {
@@ -39,7 +41,11 @@ function pickRandomSong(songs: Song[], excludedSongIds: number[] = []): Song {
   return nextSong;
 }
 
-function buildSpinTrack(songs: Song[], finalSong: Song, sequenceLength: number) {
+function buildSpinTrack(
+  songs: Song[],
+  finalSong: Song,
+  sequenceLength: number,
+) {
   const sequence: Song[] = [];
   let previousSongId: number | null = null;
 
@@ -147,9 +153,13 @@ export function RandomSongDialog({
 
   const currentTrackSong = useMemo(
     () => trackSongs[activeTrackIndex] ?? selectedSong,
-    [activeTrackIndex, selectedSong, trackSongs]
+    [activeTrackIndex, selectedSong, trackSongs],
   );
-  const rerollButtonLabel = isSpinning ? "随机中..." : didLand ? "再抽一次" : "准备开始";
+  const rerollButtonLabel = isSpinning
+    ? "随机中..."
+    : didLand
+      ? "再抽一次"
+      : "准备开始";
   const shouldHighlightRerollButton = rerollButtonLabel === "再抽一次";
 
   const startSpin = useCallback(() => {
@@ -165,7 +175,9 @@ export function RandomSongDialog({
 
     const finalSong = pickRandomSong(
       songs,
-      lastSelectedSongIdRef.current != null ? [lastSelectedSongIdRef.current] : []
+      lastSelectedSongIdRef.current != null
+        ? [lastSelectedSongIdRef.current]
+        : [],
     );
     onSelectedSongChange(null);
     setDidLand(false);
@@ -187,11 +199,11 @@ export function RandomSongDialog({
     }
 
     const sequenceLength = 18 + Math.floor(Math.random() * 5);
-    const { trackSongs: nextTrackSongs, startIndex, finalIndex } = buildSpinTrack(
-      songs,
-      finalSong,
-      sequenceLength
-    );
+    const {
+      trackSongs: nextTrackSongs,
+      startIndex,
+      finalIndex,
+    } = buildSpinTrack(songs, finalSong, sequenceLength);
 
     setTrackSongs(nextTrackSongs);
     setActiveTrackIndex(startIndex);
@@ -205,15 +217,21 @@ export function RandomSongDialog({
       const moveDelay = delays[move - 1];
       const nextIndex = startIndex + move;
       const moveTimeout = window.setTimeout(() => {
-        setTransitionMs(Math.max(scaleSpinTime(90), moveDelay - scaleSpinTime(16)));
+        setTransitionMs(
+          Math.max(scaleSpinTime(90), moveDelay - scaleSpinTime(16)),
+        );
         setActiveTrackIndex(nextIndex);
 
         if (nextIndex === finalIndex) {
-          const finishTimeout = window.setTimeout(() => {
-            setIsSpinning(false);
-            setDidLand(true);
-            onSelectedSongChange(finalSong);
-          }, Math.max(scaleSpinTime(90), moveDelay - scaleSpinTime(16)) + scaleSpinTime(70));
+          const finishTimeout = window.setTimeout(
+            () => {
+              setIsSpinning(false);
+              setDidLand(true);
+              onSelectedSongChange(finalSong);
+            },
+            Math.max(scaleSpinTime(90), moveDelay - scaleSpinTime(16)) +
+              scaleSpinTime(70),
+          );
 
           timeoutsRef.current.push(finishTimeout);
         }
@@ -268,20 +286,24 @@ export function RandomSongDialog({
                   </p>
                   <Button
                     type="button"
-                    variant={shouldHighlightRerollButton ? "default" : "outline"}
+                    variant={
+                      shouldHighlightRerollButton ? "default" : "outline"
+                    }
                     size="sm"
                     className={cn(
                       "h-auto rounded-full px-2.5 py-1 text-[11px] font-medium transition-all",
                       shouldHighlightRerollButton
                         ? "border-primary shadow-sm shadow-primary/25"
-                        : "border-border/60 bg-background/80 text-muted-foreground shadow-none"
+                        : "border-border/60 bg-background/80 text-muted-foreground shadow-none",
                     )}
                     onClick={onReroll}
                   >
                     <Sparkles
                       className={cn(
                         "h-3.5 w-3.5",
-                        shouldHighlightRerollButton ? "text-primary-foreground" : "text-primary"
+                        shouldHighlightRerollButton
+                          ? "text-primary-foreground"
+                          : "text-primary",
                       )}
                     />
                     {rerollButtonLabel}
@@ -300,7 +322,8 @@ export function RandomSongDialog({
                       aria-hidden="true"
                       className={cn(
                         "pointer-events-none absolute inset-x-2 top-1/2 h-14 -translate-y-1/2 rounded-2xl border border-primary/35 bg-primary/10 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition-all duration-300",
-                        didLand && "animate-slot-land border-primary/50 bg-primary/14"
+                        didLand &&
+                          "animate-slot-land border-primary/50 bg-primary/14",
                       )}
                     />
                     <div className="relative h-[280px] overflow-hidden">
@@ -325,7 +348,9 @@ export function RandomSongDialog({
                                   "opacity-80 blur-[0.2px] text-foreground/85",
                                 distance >= 2 &&
                                   "opacity-45 blur-[0.8px] text-muted-foreground",
-                                isSpinning && distance === 0 && "tracking-[0.01em]"
+                                isSpinning &&
+                                  distance === 0 &&
+                                  "tracking-[0.01em]",
                               )}
                             >
                               <div className="min-w-0">
@@ -352,7 +377,8 @@ export function RandomSongDialog({
                 <div
                   className={cn(
                     "mt-4 rounded-2xl border border-border/65 bg-background/85 p-4 transition-all duration-300",
-                    didLand && "animate-slot-land border-primary/30 shadow-lg shadow-primary/10"
+                    didLand &&
+                      "animate-slot-land border-primary/30 shadow-lg shadow-primary/10",
                   )}
                 >
                   <p className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
@@ -367,11 +393,9 @@ export function RandomSongDialog({
                     </p>
                   </div>
                   <p className="mt-3 text-sm text-muted-foreground">
-                    {isSpinning
-                      ? "歌名正在飞快掠过，命运马上会停下来。"
-                      : didLand
-                        ? "今天唱这首怎么样？如果不够过瘾，再摇一次。"
-                        : "准备好以后就可以开始抽取。"}
+                    {didLand
+                      ? "点这首歌怎么样？如果不满意，可以点击上方按钮再抽一次"
+                      : "准备好就可以开始抽了。"}
                   </p>
                 </div>
               </div>
