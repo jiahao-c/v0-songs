@@ -1,23 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { SongHeader } from "./song-header";
 import { SearchBar } from "./search-bar";
 import { ArtistFilter } from "./artist-filter";
 import { SongList } from "./song-list";
+import { RandomSongDialog } from "./random-song-dialog";
+import {
+  DEFAULT_SONGLIST_MARKDOWN,
+  SongRequestInstructions,
+} from "./song-request-instructions";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { AboutSection, Artist, Song } from "@/lib/content-data";
 
 interface SongCatalogProps {
@@ -25,38 +26,6 @@ interface SongCatalogProps {
   initialArtists?: Artist[];
   initialAboutSections?: AboutSection[];
 }
-
-const DEFAULT_SONGLIST_MARKDOWN = `欢迎大家点歌！点歌是免费的！
-
-但如果你喜欢我的演唱，我会很感谢您的小费支持！希望我的歌声带给你美好的音乐体验！`;
-
-const markdownComponents = {
-  p: ({ children }: { children?: ReactNode }) => (
-    <p className="mb-3 last:mb-0">{children}</p>
-  ),
-  ul: ({ children }: { children?: ReactNode }) => (
-    <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">{children}</ul>
-  ),
-  ol: ({ children }: { children?: ReactNode }) => (
-    <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">{children}</ol>
-  ),
-  a: ({
-    href,
-    children,
-  }: {
-    href?: string;
-    children?: ReactNode;
-  }) => (
-    <a
-      href={href}
-      className="text-primary underline underline-offset-2"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {children}
-    </a>
-  ),
-};
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -76,6 +45,9 @@ export function SongCatalog({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isSonglistModalOpen, setIsSonglistModalOpen] = useState(false);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [isRandomSongModalOpen, setIsRandomSongModalOpen] = useState(false);
+  const [randomSong, setRandomSong] = useState<Song | null>(null);
+  const [randomSongRollToken, setRandomSongRollToken] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -142,10 +114,19 @@ export function SongCatalog({
   const isInitialLoading = (songsLoading && !songs) || (artistsLoading && !artists);
   const hasError = songsError || artistsError;
   const groupedByArtist = !selectedArtist;
+  const availableSongs = songs ?? [];
+  const instructionsMarkdown = aboutSections ? songlistMarkdown : undefined;
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <SongHeader totalSongs={totalSongs} />
+      <SongHeader
+        totalSongs={totalSongs}
+        onRandomSongClick={() => {
+          setRandomSong(null);
+          setIsRandomSongModalOpen(true);
+          setRandomSongRollToken((token) => token + 1);
+        }}
+      />
       <SearchBar value={search} onChange={setSearch} />
 
       {!artistsLoading && artists && (
@@ -172,7 +153,7 @@ export function SongCatalog({
         </div>
       ) : (
         <SongList
-          songs={songs ?? []}
+          songs={availableSongs}
           showArtist={!selectedArtist}
           groupedByArtist={groupedByArtist}
           onSongClick={(song) => {
@@ -196,22 +177,10 @@ export function SongCatalog({
             </div>
           )}
 
-          <DialogHeader>
-            <DialogTitle className="text-base">如何点歌</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
-            {aboutSectionsLoading && !aboutSections ? (
-              <p>正在加载点歌说明...</p>
-            ) : (
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={markdownComponents}
-              >
-                {songlistMarkdown}
-              </ReactMarkdown>
-            )}
-          </div>
+          <SongRequestInstructions
+            markdown={instructionsMarkdown}
+            isLoading={aboutSectionsLoading && !aboutSections}
+          />
 
           <DialogFooter>
             <DialogClose asChild>
@@ -222,6 +191,26 @@ export function SongCatalog({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <RandomSongDialog
+        open={isRandomSongModalOpen}
+        songs={availableSongs}
+        selectedSong={randomSong}
+        rerollToken={randomSongRollToken}
+        songlistMarkdown={instructionsMarkdown}
+        aboutSectionsLoading={aboutSectionsLoading && !aboutSections}
+        onOpenChange={(open) => {
+          setIsRandomSongModalOpen(open);
+          if (!open) {
+            setRandomSong(null);
+          }
+        }}
+        onSelectedSongChange={setRandomSong}
+        onReroll={() => {
+          setRandomSong(null);
+          setRandomSongRollToken((token) => token + 1);
+        }}
+      />
     </div>
   );
 }

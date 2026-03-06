@@ -2,10 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Settings2 } from "lucide-react";
+import { Dices, Settings2 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 
-export function SongHeader({ totalSongs }: { totalSongs: number }) {
+interface SongHeaderProps {
+  totalSongs: number;
+  onRandomSongClick?: () => void;
+}
+
+export function SongHeader({ totalSongs, onRandomSongClick }: SongHeaderProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-border/80 bg-background/75 backdrop-blur-xl">
       <div
@@ -40,6 +46,18 @@ export function SongHeader({ totalSongs }: { totalSongs: number }) {
           </div>
         </Link>
 
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onRandomSongClick}
+          className="h-9 w-9 shrink-0 justify-center gap-0 rounded-full border border-border/70 bg-card/75 px-0 text-xs font-medium text-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-primary/70 hover:bg-card/75 hover:text-primary sm:w-auto sm:gap-1.5 sm:px-3"
+          aria-label="随机一首"
+          title="随机一首"
+        >
+          <Dices className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">随机一首</span>
+        </Button>
         <ThemeToggle />
         <Link
           href="/manage"

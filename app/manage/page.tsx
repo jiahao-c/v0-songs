@@ -102,6 +102,9 @@ export default async function ManagePage({ searchParams }: ManagePageProps) {
                 required
               />
               <Button type="submit">进入管理页</Button>
+              <Button asChild type="button" variant="outline">
+                <Link href="/">返回主页</Link>
+              </Button>
             </form>
           )}
         </div>
